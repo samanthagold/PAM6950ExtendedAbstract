@@ -1,0 +1,6 @@
+Data notes 
+social_capital_county: from https://data.humdata.org/dataset/social-capital-atlas and includes social capital measures from Opportunity Insights 
+	* key columns: num_below_p50 (num children below national median parental household) This column comes from the opportunity atlast. Pop2018 
+social_capital_highschools: from same website as above and includes social capital measures of colleges in the U.S. Useful for understanding what schools young adults have access to. 
+
+
