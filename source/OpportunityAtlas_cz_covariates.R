@@ -6,7 +6,7 @@
 library(haven)
 library(tidyverse)
 
-wd <- "/Users/sammygold/Documents/PAM6950ExtendedAbstract/data/"
+wd <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/"
 dirname <- "OpportunityAtlas"
 filename_in <- "cz_covariates.dta"
 outdir <- "/Users/sammygold/Documents/PAM6950ExtendedAbstract/data/OpportunityAtlas/clean/"

@@ -4,7 +4,7 @@
 # Outfile: subsetted dataset 
 library(tidyverse)
 library(haven)
-fp <- "/Users/sammygold/Documents/PAM6950ExtendedAbstract/data/"
+fp <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/"
 dir <- "OpportunityAtlas/"
 filename <- "cz_outcomes.dta"
 filename_out_pooled <- "clean/cz_outcomes_clean_pooled.csv"
