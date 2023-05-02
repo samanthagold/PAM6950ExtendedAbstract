@@ -17,7 +17,7 @@ options("RStata.StataPath" = stata_fp)
 options("RStata.StataVersion" = stata_version)
 # Relevant files 
 xwalk <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/cty_cz_st_crosswalk.csv"
-xwalk_daniel <- "/Users/sammygold/Downloads/cz_xwalk.csv"
+xwalk_daniel <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/cz_xwalk.csv"
 # Helpers
 states <- function() {
   c(
