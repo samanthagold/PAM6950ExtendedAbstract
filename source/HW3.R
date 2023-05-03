@@ -69,8 +69,8 @@ states <- function() {
 
 # Data Gathering ----------------------------------------------------------
 
-wd <- "/Users/sammygold/Documents/PAM6950ExtendedAbstract/data/"
-outdir <- "/Users/sammygold/Documents/PAM6950ExtendedAbstract/output/"
+wd <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/"
+outdir <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/output/"
 
 # Loading in Opportunity Insights Migration #'s 
 migration <- read_csv(paste0(wd, "od_pooled.csv")) %>%
@@ -261,7 +261,7 @@ state_lines <- tigris::states(cb = TRUE, resolution = "20m", year = 1990) %>%
 # Mapping migration data --------------------------------------------------
 
 
-spat_dat <- sf::st_read("Documents/PAM 6950/HW3/cz1990_shapefile/cz1990.shp") %>% 
+spat_dat <- sf::st_read("/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/cz1990_shapefile/cz1990.shp") %>% 
     inner_join(spat_dat, by = c("cz" = "o_cz")) %>% 
     tigris::shift_geometry() %>% 
     filter(! o_state_name %in% c("Alaska", "Hawaii"))
