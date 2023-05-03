@@ -1,11 +1,12 @@
 # purpose -----------------------------------------------------------------
 ## goal: execute main analysis for extended abstract 
-### data cleaning task: generate quartiles for outcomes of interest [ ]
+### data cleaning task: generate quartiles for outcomes of interest [X]
 ### plot 1 - heatmaps (origin segregation x destination economic opportunity) []
 ### plot 2 - create sankey graphs with flows colored by region of US/state? []
 ### data cleaning: create perc_outflows variable, create perc_inflows variable []
-### plot 3 - mapping outflows + overlaying colleges (by color) []
-### plot 4 - mapping inflows + overlaying college (by upward mobility status) []
+### plot 3 - mapping outflows + overlaying colleges (by color) [X]
+### plot 4 - mapping inflows + overlaying college (by upward mobility status) [X]
+### for plots 3 and 4 - make sure you are adding in alaska and hawaii []
 # -------------------------------------------------------------------------
 # Setup -------------------------------------------------------------------
 library(tidyverse)
@@ -17,7 +18,6 @@ shapefile <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/cz1
 schools <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/schoolmobility_locations.csv"
 # output directory
 outdir <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/output/"
-# -------------------------------------------------------------------------
 # generate quartiles for outcomes of interest -----------------------------
 ## creating quantiles for segregation in origin 
 data <- read_csv(data)
@@ -26,6 +26,7 @@ seg_quantiles_o <- quantile(
   seq(0, 1, length.out = 4)
 )
 
+## Using this outcome because it is missing less than d_kfr_black_pooled_mean 
 opp_quantiles_d <- quantile(
   data$d_kfr_black_pooled_p25, 
   seq(0, 1, length.out = 4), na.rm = TRUE
@@ -41,12 +42,12 @@ plot_data <- data %>%
     ),
     dest_opp_levels = cut(
       d_kfr_black_pooled_p25, 
-      breaks = opp_quantiles_d_alt, 
+      breaks = opp_quantiles_d, 
       include.lowest = TRUE
     ), 
     origin_segregation_levels = case_when(origin_segregation_levels == "[0,0.367]" ~ "Low", 
-                                          origin_segregation_levels == "(0.376,0.498]" ~ "Medium", 
-                                          origin_segregation_levels == "(0.498,0882]" ~ "High", 
+                                          origin_segregation_levels == "(0.367,0.498]" ~ "Medium", 
+                                          origin_segregation_levels == "(0.498,0.882]" ~ "High", 
                                           TRUE ~ NA_character_), 
     dest_opp_levels = case_when(dest_opp_levels == "[16.4,32.1]" ~ "Low", 
                                 dest_opp_levels == "(32.1,34.9]" ~ "Medium", 
@@ -55,6 +56,12 @@ plot_data <- data %>%
   )
 
 
+
+
+# plot 1 ------------------------------------------------------------------
+
+
+# plot 2 ------------------------------------------------------------------
 
 
 # plot 3 ------------------------------------------------------------------
@@ -264,8 +271,8 @@ ggsave(plot = segregation_and_migration,
        width = 14)
 
 
-# -------------------------------------------------------------------------
 # plot 4 ------------------------------------------------------------------
+## Generating outflows 
 final_data <- data %>% 
   filter(o_cz == d_cz) %>% 
   mutate(outflows = n_tot_o_black - n_black, 
