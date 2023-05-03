@@ -19,7 +19,40 @@ schools <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/schoo
 outdir <- "/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/output/"
 # -------------------------------------------------------------------------
 # generate quartiles for outcomes of interest -----------------------------
+## creating quantiles for segregation in origin 
 data <- read_csv(data)
+seg_quantiles_o <- quantile(
+  data$o_diswbcz, 
+  seq(0, 1, length.out = 4)
+)
+
+opp_quantiles_d <- quantile(
+  data$d_kfr_black_pooled_p25, 
+  seq(0, 1, length.out = 4), na.rm = TRUE
+)
+
+## actually creating categories in the data 
+plot_data <- data %>% 
+  mutate(
+    origin_segregation_levels = cut(
+      o_diswbcz, 
+      breaks = seg_quantiles_o, 
+      include.lowest = TRUE
+    ),
+    dest_opp_levels = cut(
+      d_kfr_black_pooled_p25, 
+      breaks = opp_quantiles_d_alt, 
+      include.lowest = TRUE
+    ), 
+    origin_segregation_levels = case_when(origin_segregation_levels == "[0,0.367]" ~ "Low", 
+                                          origin_segregation_levels == "(0.376,0.498]" ~ "Medium", 
+                                          origin_segregation_levels == "(0.498,0882]" ~ "High", 
+                                          TRUE ~ NA_character_), 
+    dest_opp_levels = case_when(dest_opp_levels == "[16.4,32.1]" ~ "Low", 
+                                dest_opp_levels == "(32.1,34.9]" ~ "Medium", 
+                                dest_opp_levels == "(34.9,56.6]" ~ "High", 
+                                TRUE ~ NA_character_)
+  )
 
 
 
