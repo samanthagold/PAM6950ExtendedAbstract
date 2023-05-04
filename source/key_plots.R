@@ -258,38 +258,42 @@ ggsave(plot = seg_opp_alluvium,
        width = 10)
 
 
-# plot 2 - seg x seg ------------------------------------------------------
-plot_data %>% 
+# table 2 - seg x seg ------------------------------------------------------
+seg_by_seg_alluvium <- plot_data %>% 
   group_by(origin_segregation_levels, dest_seg_levels) %>% 
   summarize(total_flows= sum(n_black)) %>% 
   group_by(origin_segregation_levels) %>% 
   mutate(sum_origin_flows = sum(total_flows)) %>% 
   ungroup() %>% 
   filter(!is.na(dest_seg_levels)) %>% 
-  write_csv(file = paste0(outdir, "seg_to_seg.csv"))
-# %>%
-#   mutate(perc_flow = total_flows/sum_origin_flows) %>% 
-#   group_by(origin_segregation_levels) %>% 
-#   arrange(desc(perc_flow), origin_segregation_levels) %>% 
-#   mutate(row_num = row_number(), 
-#          top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0), 
-#          fill = case_when(top_flow == 1 ~ "#0B58C7", 
-#                           TRUE ~ "#8A96A7")) %>% 
-#   ungroup() %>% 
-#   as.data.frame() %>% 
-#   ggplot(aes(y = total_flows, 
-#              axis1 = origin_segregation_levels, 
-#              axis2 = dest_seg_levels)) + 
-#   geom_alluvium(aes(fill = fill), width = 1/12) + 
-#   geom_stratum(width = 1/12, fill = "black", color = "grey") + 
-#   geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
-#   scale_x_discrete(limits = c("Origin Segregation", "Destination Segregation"), expand = c(0.05, 0.05)) + 
-#   theme_minimal() + 
-#   scale_fill_identity() + 
-#   theme(axis.text.y = element_blank(), 
-#         axis.title.y = element_blank(), 
-#         axis.text.x = element_text(size = 12)) 
-# 
+#  write_csv(file = paste0(outdir, "seg_to_seg.csv"))
+#%>%
+  mutate(perc_flow = total_flows/sum_origin_flows) %>%
+  group_by(origin_segregation_levels) %>%
+  arrange(desc(perc_flow), origin_segregation_levels) %>%
+  mutate(row_num = row_number(),
+         top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0),
+         fill = case_when(top_flow == 1 ~ "#0B58C7",
+                          TRUE ~ "#8A96A7")) %>%
+  ungroup() %>%
+  as.data.frame() %>%
+  ggplot(aes(y = total_flows,
+             axis1 = origin_segregation_levels,
+             axis2 = dest_seg_levels)) +
+  geom_alluvium(aes(fill = fill), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Origin Segregation", "Destination Segregation"), expand = c(0.05, 0.05)) +
+  theme_minimal() +
+  scale_fill_identity() +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(size = 12))
+
+ggsave(plot = seg_by_seg_alluvium, 
+       filename = paste0(outdir, "plot2_seg_seg_counts.png"), 
+       height = 6, 
+       width = 10)
 
 
 
@@ -321,7 +325,7 @@ opp_opp_alluvium <- opp_by_opp %>%
   geom_alluvium(aes(fill = fill), width = 1/12) + 
   geom_stratum(width = 1/12, fill = "black", color = "grey") + 
   geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
-  scale_x_discrete(limits = c("Origin Segregation", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
+  scale_x_discrete(limits = c("Origin Opportunity", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
   theme_minimal() + 
   scale_fill_identity() + 
   theme(axis.text.y = element_blank(), 
