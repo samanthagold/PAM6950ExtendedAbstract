@@ -1,12 +1,12 @@
 # purpose -----------------------------------------------------------------
 ## goal: execute main analysis for extended abstract 
 ### data cleaning task: generate quartiles for outcomes of interest [X]
-### plot 1 - heatmaps (origin segregation x destination economic opportunity) []
-### plot 2 - create sankey graphs with flows colored by region of US/state? []
-### data cleaning: create perc_outflows variable, create perc_inflows variable []
+### plot 1 - heatmaps (origin segregation x destination economic opportunity) [X]
+### plot 2 - create sankey graphs with flows colored by region of US/state? [X]
+### data cleaning: create perc_outflows variable, create perc_inflows variable [X]
 ### plot 3 - mapping outflows + overlaying colleges (by color) [X]
 ### plot 4 - mapping inflows + overlaying college (by upward mobility status) [X]
-### for plots 3 and 4 - make sure you are adding in alaska and hawaii []
+### for plots 3 and 4 - make sure you are adding in alaska and hawaii [X]
 # -------------------------------------------------------------------------
 # Setup -------------------------------------------------------------------
 library(tidyverse)
@@ -200,6 +200,112 @@ plot_data %>%
   scale_x_discrete(limits = c("Origin Segregation", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
   theme_minimal() + 
   scale_fill_identity()
+
+
+
+# key_flows ---------------------------------------------------------------
+plot_data %>% 
+  filter(origin_opp_levels == "Low Opportunity" & dest_opp_levels == "High Opportunity") %>% 
+  arrange(desc(n_black)) %>% 
+  slice_head(n = 3) %>% 
+  select(o_cz_name_black, d_cz_name_black, n_black) 
+
+plot_data %>% 
+  filter(origin_segregation_levels == "High Segregation" & dest_opp_levels == "High Opportunity") %>% 
+  arrange(desc(n_black)) %>% 
+  slice_head(n = 3) %>% 
+  select(o_cz_name_black, d_cz_name_black, n_black)
+
+plot_data %>% 
+  filter(origin_segregation_levels == "High Segregation" & dest_seg_levels == "Low Segregation") %>% 
+  arrange(desc(n_black)) %>% 
+  slice_head(n = 3) %>% 
+  select(o_cz_name_black, d_cz_name_black, n_black)
+
+
+
+# descriptive analysis ----------------------------------------------------
+## how many flows were there in total? this is the denominator to provide context
+data %>% summarize(total_flows = sum(n_black))
+## how many flows were within commuting zone flows?? 
+data %>% 
+  add_tally(n_black, name = "total_flows") %>% 
+  # What are the avg characteristics of within_flows vs. moving origin cz flows? 
+  mutate(same_cz = case_when(o_cz == d_cz ~ 1, 
+                                    TRUE ~ 0)) %>% 
+  group_by(same_cz) %>% # different flows 
+  mutate(total_by_flow_type = sum(n_black), 
+         perc_by_flow_type = round(sum(n_black)/total_flows * 100, 3), 
+         avg_o_seg = mean(o_diswbcz), 
+         avg_d_seg = mean(d_diswbcz), 
+         avg_o_kfr_black_pooled_p25 = mean(o_kfr_black_pooled_p25, na.rm = TRUE), 
+         avg_d_kfr_black_pooled_p25 = mean(d_kfr_black_pooled_p25, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  select(same_cz, total_by_flow_type, total_flows, perc_by_flow_type, avg_o_seg, avg_d_seg, avg_o_kfr_black_pooled_p25, avg_d_kfr_black_pooled_p25) %>% 
+  distinct()
+# same_cz | total_flows | perc_by_flow_type | avg o seg | avg d seg | avg o opportunity | avg d opportunity 
+## something funky going on with metrics?? 
+
+# Where are the largest number of flows from by type..
+data %>% 
+  add_tally(n_black, name = "total_flows") %>% 
+  mutate(same_cz = case_when(o_cz == d_cz ~ 1, 
+                             TRUE ~ 0)) %>% 
+  select(same_cz, o_cz_name_black, d_cz_name_black, n_black, total_flows) %>% 
+  group_by(same_cz) %>% 
+  arrange(desc(n_black)) %>% 
+  mutate(total_by_flow_type = sum(n_black), 
+         perc_by_flow_type = round(sum(n_black)/total_flows * 100, 3), 
+         share = n_black/total_by_flow_type) %>% 
+  slice_head(n = 10) %>% 
+  select(same_cz, o_cz_name_black, d_cz_name_black,share) %>% 
+  distinct() 
+# same_cz, o_cz, d_cz, share 
+# takeaway: there isn't a clear winner in any of the flow types 
+  
+
+# Where aren't young black adults not moving to? 
+data %>% 
+  mutate(nonzero_black_flows = case_when(n_black == 0 ~ 0,
+                                         TRUE ~ 1), 
+         total_possible = n()) %>% 
+  group_by(nonzero_black_flows) %>% 
+  mutate(total_flows_w_noblack = n()/total_possible) %>% 
+  distinct(nonzero_black_flows, total_flows_w_noblack) 
+  # nonzero_black_flows | total_flows_w_noblack
+# Large number of commuting zones that black young adults do not move to. 
+
+# Where are they avoiding that are popular among others? 
+# could be helpful to have a map of all the places people aren't moving 
+# final piece: map?
+# not sure if you can map this...how to represent the unique cz to dcz combinaition. 
+# would need to look at flows of white people 
+# data %>% 
+#   mutate(nonzero_black_flows = case_when(n_black == 0 ~ 0,
+#                                          TRUE ~ 1), 
+#          total_possible = n())
+# black_flows <- read_csv("/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/MigrationPatternsData/od_race.csv") %>% 
+#   filter(pool == "Black") %>% 
+#   rename_with(~paste0(.x, "_black"), .cols = everything()) %>% 
+#   rename(o_cz = o_cz_black, 
+#          d_cz = d_cz_black) 
+# 
+# white_flows <- read_csv("/Users/sammygold/Documents/GitHub/PAM6950ExtendedAbstract/data/MigrationPatternsData/od_race.csv") %>% 
+#   filter(pool == "White") %>% 
+#   rename_with(~paste0(.x, "_white"), .cols = everything()) %>% 
+#   rename(o_cz = o_cz_white, 
+#          d_cz = d_cz_white)
+# 
+# black_flows %>% 
+#   inner_join(white_flows, by = c("o_cz", "d_cz")) %>% 
+#   filter(n_black == 0) %>% 
+#   arrange(desc(n_white)) %>%
+#   slice_head(n = 100) %>% 
+#   select(o_cz_name, d_cz_name, n_black, n_white)
+# 
+#   mutate(nonzero_black_flows = case_when(n_black == 0 ~ 0, 
+#                                          TRUE ~ 1)) %>% 
+#   
 
 
 # Plot 2 - Seg x Opp ------------------------------------------------------
@@ -484,6 +590,153 @@ ggsave(plot = segregation_and_migration,
        width = 14)
 
 
+# plot 3 test - outflows ------------------------------------------------------------------
+# Final tweaks to data 
+final_data <- data %>% 
+  filter(o_cz == d_cz, 
+         n_black != 0) %>% 
+  mutate(outflows = n_tot_o_black - n_black, 
+         perc_outflow = outflows/n_tot_o_black, 
+         perc_outflow = case_when(is.na(perc_outflow) ~ 0, 
+                                  is.infinite(perc_outflow) ~ 0, # result of random noise being added to publicly available dataset
+                                  perc_outflow < 0 ~ 0,          # result of random noise 
+                                  TRUE ~ perc_outflow))  %>% 
+  rename(perc_noflow = pr_d_o_black) 
+
+
+
+# Create quantiles for dissimilarity
+seg_quantiles <- quantile(
+  final_data$o_diswbcz, 
+  seq(0, 1, length.out = 5)
+)
+
+outflow_quantiles <- quantile(
+  final_data$perc_outflow, 
+  seq(0, 1, length.out = 5)
+)
+
+# Create color scheme 
+bivariate_color_scale <- dplyr::bind_rows(
+  tibble::enframe(
+    biscale::bi_pal("DkViolet2", dim = 4, preview = FALSE),
+    name = "group",
+    value = "fill"
+  )
+)
+
+# Create quantiles in data 
+spat_dat <- final_data |>
+  dplyr::mutate(
+    segregation = cut(
+      o_diswbcz,
+      breaks = seg_quantiles,
+      include.lowest = TRUE
+    ),
+    #        absolute_mobility = forcats::fct_rev(absolute_mobility),
+    outflow = cut(
+      perc_outflow,
+      breaks = outflow_quantiles,
+      include.lowest = TRUE
+    ),
+    group = paste0(as.numeric(segregation), "-", as.numeric(outflow))
+  ) |>
+  dplyr::left_join(bivariate_color_scale, by = "group") 
+
+## Map prep 
+font_fam <- "Trebuchet MS"
+bivariate_color_scale2 <- bivariate_color_scale |>
+  tidyr::separate(group, into = c("segregation", "outflow"), sep = "-") |>
+  dplyr::mutate(
+    segregation = as.integer(segregation),
+    outflow = as.integer(outflow)
+  )
+
+legend <- ggplot2::ggplot() +
+  ggplot2::geom_tile(
+    data = bivariate_color_scale2,
+    mapping = ggplot2::aes(
+      x = segregation,
+      y = outflow,
+      fill = fill
+    )
+  ) +
+  ggplot2::scale_fill_identity() +
+  ggplot2::labs(
+    x = "  Higher segregation \U00BB",
+    y = "  Higher outflow \U00BB"
+  ) +
+  ggplot2::theme(
+    axis.text = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank(),
+    axis.title = ggplot2::element_text(size = 10),
+    plot.background = ggplot2::element_rect(fill = "white", color = NA),
+    panel.background = ggplot2::element_rect(fill = "white", color = NA),
+    panel.grid = ggplot2::element_blank(),
+    text = ggplot2::element_text(family = font_fam)
+  ) +
+  ggplot2::coord_fixed()
+
+
+state_lines <- tigris::states(cb = TRUE, resolution = "20m", year = 1990) %>% 
+  filter(NAME %in% states()) %>% 
+  tigris::shift_geometry()
+
+spat_dat <- sf::st_read(shapefile) %>% 
+  inner_join(spat_dat, by = c("cz" = "o_cz")) %>% 
+  tigris::shift_geometry() #%>% 
+#filter(! o_state_name_black %in% c("Alaska", "Hawaii"))
+
+# Finally mapping everything together 
+segregation_migration_map <- ggplot2::ggplot(
+  data = spat_dat,
+  mapping = ggplot2::aes(fill = fill)
+) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(
+    data = sf::st_transform(state_lines, sf::st_crs(spat_dat)),
+    color = "white",
+    alpha = 0,
+    inherit.aes = FALSE
+  ) +
+  ggplot2::scale_fill_identity() + 
+  ggplot2::theme(
+    axis.text = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank(),
+    panel.grid.major = ggplot2::element_line(
+      color = "gray92",
+      size = 0.2
+    ),
+    panel.grid.minor = ggplot2::element_blank(),
+    plot.background = ggplot2::element_rect(fill = "white", color = NA),
+    panel.background = ggplot2::element_rect(fill = "white", color = NA),
+    plot.title = ggplot2::element_text(face = "bold", hjust = 0.5, size = 18),
+    plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 15),
+    legend.title = ggplot2::element_blank(),
+    text = ggplot2::element_text(family = font_fam)
+  ) #+ 
+#ggplot2::labs(
+#  title = "Migration of Young Adults and Segregation in the U.S.",
+#  subtitle = "Percent of outflows and White-Black dissimilarity index by Commuting Zone", 
+#  caption = 
+#    "Percent of outflows represented as the number of people moving out of a given commuting zone divided by the number of people who live in the commuting zone. 
+#      Percent of outflows calculated using migration data from Opportunity Insights and population estimates from the Decennial Census. Note that the migration 
+#      patterns are restricted to adults younger than 26. The black-white dissimilarity index was constructed using population estimates primarily from the 2010 
+#      Decennial Census and supplemented with the 2000 Decennial Census where necessary. Quantile breaks were used to determine the color ramp for both layers of data. 
+#      Map projection used: USA Contiguous Albers Equal Area Conic. Commuting Zone shapefile from the Health Inequality Project."
+#  
+#)
+
+segregation_and_migration <- cowplot::ggdraw() +
+  cowplot::draw_plot(segregation_migration_map, 0, 0, 1, 1) +
+  cowplot::draw_plot(legend, .83, .03, .2, .2)
+
+ggsave(plot = segregation_and_migration, 
+       filename = paste0(outdir, "plot3_segoutflows_restricted.png"), 
+       height = 10, 
+       width = 14)
+
+
 # plot 4 - inflows  ------------------------------------------------------------------
 ## Generating inflows 
 #Final tweaks to data 
@@ -499,7 +752,7 @@ final_data <- data %>%
 
 # Create quantiles for dissimilarity
 seg_quantiles <- quantile(
-  final_data$o_diswbcz, 
+  final_data$d_diswbcz, 
   seq(0, 1, length.out = 5)
 )
 
@@ -521,7 +774,7 @@ bivariate_color_scale <- dplyr::bind_rows(
 spat_dat <- final_data |>
   dplyr::mutate(
     segregation = cut(
-      o_diswbcz,
+      d_diswbcz,
       breaks = seg_quantiles,
       include.lowest = TRUE
     ),
