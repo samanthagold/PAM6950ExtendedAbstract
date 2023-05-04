@@ -885,10 +885,10 @@ segregation_migration_map <- ggplot2::ggplot(
     inherit.aes = FALSE
   ) +
   ggplot2::geom_sf(
-    data = tigris::shift_geometry(sf::st_transform(schools, sf::st_crs(spat_dat))), 
+    data = tigris::shift_geometry(sf::st_transform(schools %>% filter(high_mobility == 1), sf::st_crs(spat_dat))), 
     alpha = 0.5, 
-    size = 0.7, 
-    aes(shape = factor(high_mobility)), 
+    size = 0.75, 
+    color = "green", 
     inherit.aes = FALSE) + 
   ggplot2::scale_fill_identity() + 
   ggplot2::theme(
