@@ -82,9 +82,22 @@ seg_quantiles_o <- quantile(
   seq(0, 1, length.out = 4)
 )
 
+## creating quantiles for segregation in destination 
+seg_quantiles_d <- quantile(
+  data$d_diswbcz, 
+  seq(0, 1, length.out = 4)
+)
+
+
 ## Using this outcome because it is missing less than d_kfr_black_pooled_mean 
 opp_quantiles_d <- quantile(
   data$d_kfr_black_pooled_p25, 
+  seq(0, 1, length.out = 4), na.rm = TRUE
+)
+
+## opportunity of origin 
+opp_quantiles_o <- quantile(
+  data$o_kfr_black_pooled_p25, 
   seq(0, 1, length.out = 4), na.rm = TRUE
 )
 
@@ -96,19 +109,37 @@ plot_data <- data %>%
       breaks = seg_quantiles_o, 
       include.lowest = TRUE
     ),
+    destination_segregation_levels = cut(
+      o_diswbcz, 
+      breaks = seg_quantiles_d, 
+      include.lowest = TRUE
+    ),
     dest_opp_levels = cut(
       d_kfr_black_pooled_p25, 
       breaks = opp_quantiles_d, 
       include.lowest = TRUE
     ), 
-    origin_segregation_levels = case_when(origin_segregation_levels == "[0,0.367]" ~ "Low", 
-                                          origin_segregation_levels == "(0.367,0.498]" ~ "Medium", 
-                                          origin_segregation_levels == "(0.498,0.882]" ~ "High", 
+    origin_opp_levels = cut(
+      o_kfr_black_pooled_p25, 
+      breaks = opp_quantiles_o, 
+      include.lowest = TRUE
+    ), 
+    origin_segregation_levels = case_when(origin_segregation_levels == "[0,0.367]" ~ "Low Segregation", 
+                                          origin_segregation_levels == "(0.367,0.498]" ~ "Medium Segregation", 
+                                          origin_segregation_levels == "(0.498,0.882]" ~ "High Segregation", 
                                           TRUE ~ NA_character_), 
-    dest_opp_levels = case_when(dest_opp_levels == "[16.4,32.1]" ~ "Low", 
-                                dest_opp_levels == "(32.1,34.9]" ~ "Medium", 
-                                dest_opp_levels == "(34.9,56.6]" ~ "High", 
-                                TRUE ~ NA_character_)
+    dest_opp_levels = case_when(dest_opp_levels == "[16.4,32.1]" ~ "Low Opportunity", 
+                                dest_opp_levels == "(32.1,34.9]" ~ "Medium Opportunity", 
+                                dest_opp_levels == "(34.9,56.6]" ~ "High Opportunity", 
+                                TRUE ~ NA_character_), 
+    dest_seg_levels = case_when(destination_segregation_levels == "[0,0.339]" ~ "Low Segregation", 
+                                destination_segregation_levels == "(0.339,0.47]" ~ "Medium Segregation", 
+                                destination_segregation_levels == "(0.47,0.856]" ~ "High Segregation", 
+                                TRUE ~ NA_character_), 
+    origin_opp_levels = case_when(origin_opp_levels == "[16.4,32.1]" ~ "Low Opportunity", 
+                                  origin_opp_levels == "(32.1,34.9]" ~ "Medium Opportunity", 
+                                  origin_opp_levels == "(34.9,56.6]" ~ "High Opportunity", 
+                                  TRUE ~ NA_character_)
   ) %>% 
   # Restricting to different flows only 
   filter(o_cz != d_cz)
@@ -117,9 +148,191 @@ plot_data <- data %>%
 
 
 # plot 1 ------------------------------------------------------------------
-# plot 2 ------------------------------------------------------------------
 plot_data %>% 
-  group_by()
+  group_by(origin_segregation_levels, dest_opp_levels) %>% 
+  summarize(total_flows = sum(n_black)) %>% 
+  filter(!is.na(dest_opp_levels)) %>% 
+  ggplot(aes(x = origin_segregation_levels, 
+             y = dest_opp_levels, 
+             fill = total_flows)) +
+  geom_tile()
+  
+# plot 2 1st pass ------------------------------------------------------------------
+plot_data %>% 
+  group_by(origin_segregation_levels, dest_opp_levels) %>% 
+  summarize(total_flows= sum(n_black)) %>% 
+  filter(!is.na(dest_opp_levels)) %>% 
+  group_by(origin_segregation_levels) %>% 
+  mutate(sum_origin_flows = sum(total_flows)) %>% 
+  ungroup() %>% 
+  mutate(perc_flow = total_flows/sum_origin_flows) %>%
+         #, 
+         #origin_segregation_levels = case_when(origin_segregation_levels == "High" ~ "High Segregation", 
+        #                                       origin_segregation_levels == "Low" ~ "Low Segregation", 
+        #                                       origin_segregation_levels == "Medium" ~ "Medium Segregation"), 
+        # dest_opp_levels = case_when(dest_opp_levels == "High" ~ "High Opportunity",
+        #                             dest_opp_levels == "Medium" ~ "Medium Opportunity", 
+        #                             dest_opp_levels == "Low" ~ "Low Opportunity")) %>%
+  group_by(origin_segregation_levels) %>% 
+  arrange(desc(perc_flow), origin_segregation_levels) %>% 
+  mutate(row_num = row_number(), 
+         top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0), 
+         fill = case_when(top_flow == 1 ~ "#0B58C7", 
+                          TRUE ~ "#8A96A7")) %>% 
+  ungroup() %>% 
+#  mutate(color = case_when(origin_segregation_levels == "Low" & dest_opp_levels == "High" ~ "Green", 
+#                           origin_segregation_levels == "Low" & dest_opp_levels == "Medium" ~ "Green", 
+#                           origin_segregation_levels == "Low" & dest_opp_levels == "Low" ~ "Red", 
+#                           origin_segregation_levels == "Medium" & dest_opp_levels == "High" ~ "Green", 
+#                           origin_segregation_levels == "Medium" & dest_opp_levels == "Medium" ~ "Grey", 
+#                           origin_segregation_levels == "Medium" & dest_opp_levels == "Low" ~ "Red", 
+#                           origin_segregation_levels == "High" & dest_opp_levels == "High" ~ "Grey", 
+#                           origin_segregation_levels == "High" & dest_opp_levels == "Medium" ~ "Red", 
+#                           origin_segregation_levels == "High" & dest_opp_levels == "Low" ~ "Red")) %>% 
+  as.data.frame() %>% 
+  ggplot(aes(y = perc_flow, 
+             axis1 = origin_segregation_levels, 
+             axis2 = dest_opp_levels)) + 
+  #geom_alluvium(aes(fill = factor(color)), width = 1/12) + 
+  geom_alluvium(aes(fill = fill), width = 1/12) + 
+  geom_stratum(width = 1/12, fill = "black", color = "grey") + 
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
+  scale_x_discrete(limits = c("Origin Segregation", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
+  theme_minimal() + 
+  scale_fill_identity()
+
+
+# Plot 2 - Seg x Opp ------------------------------------------------------
+
+
+# Looking at counts instead of percents 
+seg_opp_alluvium <- plot_data %>% 
+  group_by(origin_segregation_levels, dest_opp_levels) %>% 
+  summarize(total_flows= sum(n_black)) %>% 
+  filter(!is.na(dest_opp_levels)) %>% 
+  group_by(origin_segregation_levels) %>% 
+  mutate(sum_origin_flows = sum(total_flows)) %>% 
+  ungroup() %>% 
+  mutate(perc_flow = total_flows/sum_origin_flows) %>% 
+         #, 
+  #       origin_segregation_levels = case_when(origin_segregation_levels == "High" ~ "High Segregation", 
+  #                                             origin_segregation_levels == "Low" ~ "Low Segregation", 
+  #                                             origin_segregation_levels == "Medium" ~ "Medium Segregation"), 
+  #       dest_opp_levels = case_when(dest_opp_levels == "High" ~ "High Opportunity",
+  #                                   dest_opp_levels == "Medium" ~ "Medium Opportunity", 
+  #                                   dest_opp_levels == "Low" ~ "Low Opportunity")) %>%
+  group_by(origin_segregation_levels) %>% 
+  arrange(desc(perc_flow), origin_segregation_levels) %>% 
+  mutate(row_num = row_number(), 
+         top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0), 
+         fill = case_when(top_flow == 1 ~ "#0B58C7", 
+                          TRUE ~ "#8A96A7")) %>% 
+  ungroup() %>% 
+  #  mutate(color = case_when(origin_segregation_levels == "Low" & dest_opp_levels == "High" ~ "Green", 
+  #                           origin_segregation_levels == "Low" & dest_opp_levels == "Medium" ~ "Green", 
+  #                           origin_segregation_levels == "Low" & dest_opp_levels == "Low" ~ "Red", 
+  #                           origin_segregation_levels == "Medium" & dest_opp_levels == "High" ~ "Green", 
+  #                           origin_segregation_levels == "Medium" & dest_opp_levels == "Medium" ~ "Grey", 
+  #                           origin_segregation_levels == "Medium" & dest_opp_levels == "Low" ~ "Red", 
+  #                           origin_segregation_levels == "High" & dest_opp_levels == "High" ~ "Grey", 
+  #                           origin_segregation_levels == "High" & dest_opp_levels == "Medium" ~ "Red", 
+  #                           origin_segregation_levels == "High" & dest_opp_levels == "Low" ~ "Red")) %>% 
+  as.data.frame() %>% 
+  ggplot(aes(y = total_flows, 
+             axis1 = origin_segregation_levels, 
+             axis2 = dest_opp_levels)) + 
+  #geom_alluvium(aes(fill = factor(color)), width = 1/12) + 
+  geom_alluvium(aes(fill = fill), width = 1/12) + 
+  geom_stratum(width = 1/12, fill = "black", color = "grey") + 
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
+  scale_x_discrete(limits = c("Origin Segregation", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
+  theme_minimal() + 
+  scale_fill_identity() + 
+  theme(axis.text.y = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.x = element_text(size = 12)) 
+
+ggsave(plot = seg_opp_alluvium, 
+       filename = paste0(outdir, "plot2_seg_opp_counts.png"), 
+       height = 6, 
+       width = 10)
+
+
+# plot 2 - seg x seg ------------------------------------------------------
+plot_data %>% 
+  group_by(origin_segregation_levels, dest_seg_levels) %>% 
+  summarize(total_flows= sum(n_black)) %>% 
+  group_by(origin_segregation_levels) %>% 
+  mutate(sum_origin_flows = sum(total_flows)) %>% 
+  ungroup() %>% 
+  filter(!is.na(dest_seg_levels)) %>% 
+  write_csv(file = paste0(outdir, "seg_to_seg.csv"))
+# %>%
+#   mutate(perc_flow = total_flows/sum_origin_flows) %>% 
+#   group_by(origin_segregation_levels) %>% 
+#   arrange(desc(perc_flow), origin_segregation_levels) %>% 
+#   mutate(row_num = row_number(), 
+#          top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0), 
+#          fill = case_when(top_flow == 1 ~ "#0B58C7", 
+#                           TRUE ~ "#8A96A7")) %>% 
+#   ungroup() %>% 
+#   as.data.frame() %>% 
+#   ggplot(aes(y = total_flows, 
+#              axis1 = origin_segregation_levels, 
+#              axis2 = dest_seg_levels)) + 
+#   geom_alluvium(aes(fill = fill), width = 1/12) + 
+#   geom_stratum(width = 1/12, fill = "black", color = "grey") + 
+#   geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
+#   scale_x_discrete(limits = c("Origin Segregation", "Destination Segregation"), expand = c(0.05, 0.05)) + 
+#   theme_minimal() + 
+#   scale_fill_identity() + 
+#   theme(axis.text.y = element_blank(), 
+#         axis.title.y = element_blank(), 
+#         axis.text.x = element_text(size = 12)) 
+# 
+
+
+
+# plot 2 - opp x opp ------------------------------------------------------
+opp_by_opp <- plot_data %>% 
+  group_by(origin_opp_levels, dest_opp_levels) %>% 
+  summarize(total_flows = sum(n_black)) %>% 
+  group_by(origin_opp_levels) %>% 
+  mutate(sum_origin_flows = sum(total_flows)) %>% 
+  ungroup() %>% 
+  filter(!is.na(origin_opp_levels), 
+         !is.na(dest_opp_levels)) %>% 
+  select(-sum_origin_flows)
+
+write_csv(opp_by_opp, file = paste0(outdir, "opp_to_opp.csv")) 
+opp_opp_alluvium <- opp_by_opp %>% 
+  group_by(origin_opp_levels) %>% 
+  arrange(desc(total_flows), origin_opp_levels) %>% 
+  mutate(row_num = row_number(), 
+         top_flow = case_when(row_num == 1 ~ 1, TRUE ~ 0), 
+         fill = case_when(top_flow == 1 ~ "#0B58C7", 
+                          TRUE ~ "#8A96A7")) %>% 
+  ungroup() %>% 
+  as.data.frame() %>% 
+  ggplot(aes(y = total_flows, 
+             axis1 = origin_opp_levels, 
+             axis2 = dest_opp_levels)) + 
+  #geom_alluvium(aes(fill = factor(color)), width = 1/12) + 
+  geom_alluvium(aes(fill = fill), width = 1/12) + 
+  geom_stratum(width = 1/12, fill = "black", color = "grey") + 
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) + 
+  scale_x_discrete(limits = c("Origin Segregation", "Destination Opportunity"), expand = c(0.05, 0.05)) + 
+  theme_minimal() + 
+  scale_fill_identity() + 
+  theme(axis.text.y = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.x = element_text(size = 12)) 
+
+ggsave(plot = opp_opp_alluvium, 
+       filename = paste0(outdir, "plot2_opp_opp_counts.png"), 
+       height = 6, 
+       width = 10)
+
 
 # plot 3 - outflows ------------------------------------------------------------------
 # Final tweaks to data 
@@ -131,7 +344,8 @@ final_data <- data %>%
                                   is.infinite(perc_outflow) ~ 0, # result of random noise being added to publicly available dataset
                                   perc_outflow < 0 ~ 0,          # result of random noise 
                                   TRUE ~ perc_outflow))  %>% 
-  rename(perc_noflow = pr_d_o_black)
+  rename(perc_noflow = pr_d_o_black) 
+  
 
 
 # Create quantiles for dissimilarity
@@ -705,7 +919,7 @@ segregation_and_migration <- cowplot::ggdraw() +
   cowplot::draw_plot(legend, .83, .03, .2, .2)
 
 ggsave(plot = segregation_and_migration, 
-       filename = paste0(outdir, "plot3_segoutflows.png"), 
+       filename = paste0(outdir, "plot6_segoutflows_schools.png"), 
        height = 10, 
        width = 14)
 

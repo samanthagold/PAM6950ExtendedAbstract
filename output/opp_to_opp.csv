@@ -1,0 +1,10 @@
+origin_opp_levels,dest_opp_levels,total_flows
+High Opportunity,High Opportunity,36184
+High Opportunity,Low Opportunity,52084
+High Opportunity,Medium Opportunity,68449
+Low Opportunity,High Opportunity,56407
+Low Opportunity,Low Opportunity,341153
+Low Opportunity,Medium Opportunity,169975
+Medium Opportunity,High Opportunity,62957
+Medium Opportunity,Low Opportunity,158879
+Medium Opportunity,Medium Opportunity,207085

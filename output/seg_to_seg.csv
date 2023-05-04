@@ -1,0 +1,6 @@
+origin_segregation_levels,dest_seg_levels,total_flows,sum_origin_flows
+High Segregation,High Segregation,811640,811649
+Low Segregation,Low Segregation,62926,89515
+Low Segregation,Medium Segregation,26589,89515
+Medium Segregation,High Segregation,59781,253133
+Medium Segregation,Medium Segregation,193352,253133
