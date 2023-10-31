@@ -1,0 +1,130 @@
+{
+    "Repository": "djmolitor/pam-project-tugboat",
+    "ImageName": "pam-project-tugboat",
+    "ImageTag": "latest",
+    "DHUsername": "djmolitor",
+    "RepoDigest": [
+        "djmolitor/pam-project-tugboat@sha256:2740ad3fc072ec957c91cafcde819e527cce1cfd5bc44edecb10577ca427805c"
+    ],
+    "ImageInfo": {
+        "Id": "sha256:117058b0df5b7b60916af6c1eab255e3881c9f0f66f14629ba04a9461f7dd4f1",
+        "RepoTags": [
+            "djmolitor/pam-project-tugboat:latest",
+            "pam-project-tugboat:latest"
+        ],
+        "RepoDigests": [
+            "djmolitor/pam-project-tugboat@sha256:2740ad3fc072ec957c91cafcde819e527cce1cfd5bc44edecb10577ca427805c"
+        ],
+        "Parent": "",
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2023-10-30T20:15:33.782785837Z",
+        "Container": "",
+        "ContainerConfig": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": null,
+            "Cmd": null,
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": null
+        },
+        "DockerVersion": "",
+        "Author": "",
+        "Config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8787/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "R_VERSION=4.3.1",
+                "R_HOME=/usr/local/lib/R",
+                "TZ=Etc/UTC",
+                "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest",
+                "LANG=en_US.UTF-8",
+                "RSTUDIO_VERSION=2023.09.1+494",
+                "PANDOC_VERSION=default",
+                "QUARTO_VERSION=default"
+            ],
+            "Cmd": [
+                "/bin/bash"
+            ],
+            "ArgsEscaped": true,
+            "Image": "",
+            "Volumes": null,
+            "WorkingDir": "/tugboat_dir",
+            "Entrypoint": null,
+            "OnBuild": null,
+            "Labels": {
+                "org.opencontainers.image.authors": "Carl Boettiger <cboettig@ropensci.org>",
+                "org.opencontainers.image.base.name": "docker.io/library/ubuntu:jammy",
+                "org.opencontainers.image.description": "Reproducible builds to fixed version of R",
+                "org.opencontainers.image.licenses": "GPL-2.0-or-later",
+                "org.opencontainers.image.ref.name": "ubuntu",
+                "org.opencontainers.image.revision": "0821d1ba00c54299c2d5c4a83372ac2985ffeda0",
+                "org.opencontainers.image.source": "https://github.com/rocker-org/rocker-versioned2",
+                "org.opencontainers.image.title": "rocker/r-ver",
+                "org.opencontainers.image.vendor": "Rocker Project",
+                "org.opencontainers.image.version": "R-4.3.1"
+            },
+            "Shell": [
+                "/bin/bash",
+                "-c"
+            ]
+        },
+        "Architecture": "arm64",
+        "Os": "linux",
+        "Size": 4188123174,
+        "VirtualSize": 4188123174,
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/xhljwv6ci52m6niknga3owkao/diff:/var/lib/docker/overlay2/snyzcox3xwro59qumkb8zdmog/diff:/var/lib/docker/overlay2/agft7cumhr10odminrq0fg3hk/diff:/var/lib/docker/overlay2/31of77xpy0e1yuchhi466eky3/diff:/var/lib/docker/overlay2/5ntl4qutmy8sd26jpsc6dmn4d/diff:/var/lib/docker/overlay2/els3e6p2ouu9fj8nsmitdx14c/diff:/var/lib/docker/overlay2/92btmvqh041h3xjm4wrz56aac/diff:/var/lib/docker/overlay2/j6krs37tmui1l7h5ox1hjfw4a/diff:/var/lib/docker/overlay2/5ae471ab538d8cae158941718281b05a0ee93b6d50808d9ee891c811bfc41231/diff:/var/lib/docker/overlay2/0b9559942d2a0c005bc163dfe79c1e45d84ee72a1b3c45050b7fa8496684e01d/diff:/var/lib/docker/overlay2/a8e765153c4f4caccea687505886de60895c84400fd94c9e862dbd4b0f4a06ca/diff:/var/lib/docker/overlay2/5248b21b896723f06a4867097a4286b557c3219c94c19451b350c35c818d05c9/diff:/var/lib/docker/overlay2/9e22dce15949aae109a7b7fb04da0190db742cf0e676995b9b3f1a724e3b9876/diff",
+                "MergedDir": "/var/lib/docker/overlay2/2jd4qq91w298nsvf9jgj5fu15/merged",
+                "UpperDir": "/var/lib/docker/overlay2/2jd4qq91w298nsvf9jgj5fu15/diff",
+                "WorkDir": "/var/lib/docker/overlay2/2jd4qq91w298nsvf9jgj5fu15/work"
+            },
+            "Name": "overlay2"
+        },
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:d2d3127fc3d362a0516c53fcb8fb983ebb9d1ea2dfbd63b69967a0084f0d45a3",
+                "sha256:fa8a44148b178a80106cb3922a3aa91addc1840433ef0bccb47d691ed8ba9400",
+                "sha256:3b6713871b9f07616a0968f68f3acb7b5e9172ee8b7688b991f42e7ed0c0f4c6",
+                "sha256:5c2cc4fad8343449750c780a6646ff627d489a09b1b3741ec15c081c71fcad1b",
+                "sha256:90904c498a0b7255f96362330526edb70236fc0f1f80b758fba3f7a17f647fd2",
+                "sha256:b1c0af1113379a10bd9a0699ee8d9f3f11109f693ceb3f7c6f48435e25dcdc6d",
+                "sha256:4da43dc9a312298459b0466792e7dee4a51fbe80e0b80caab47300c049966646",
+                "sha256:db4f45e54ae7e9e5873a5f93ddeaae72c02796c11c7240bd087e582f8ff911f7",
+                "sha256:498c2b463f5ad733ee40a89fca5d00d3c727400321df3be16a6c5f50486dfd2f",
+                "sha256:1f5c459d5d5186280ba41501eeee0f030d5f068f4c0a800ebd1eb81f0dab958f",
+                "sha256:698d51b2b1e844b9adb135bae161465638594782cdbc6be05e7f6c5607e5d902",
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+                "sha256:3dca95fb57d031397b285de7042f47db06045641830a260e2957c890bcb0b8a2",
+                "sha256:207c58b081481760bc8f35bab2cd40a2f7ee1f92df43cb80c221faee4b0c8d02"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2023-10-30T20:16:39.679683416Z"
+        }
+    },
+    "DockerfileHash": "03e4ab582d2a053331f6a4bc2448f4d741bd55990818f54aec99e1c7f2a98e26"
+}

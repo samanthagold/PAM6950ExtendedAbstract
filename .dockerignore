@@ -1,0 +1,8 @@
+Dockerfile
+.dockerignore
+.dockerenv
+.Rhistory
+.Rprofile
+.Rproj.user
+.git
+renv
